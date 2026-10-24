@@ -1,0 +1,65 @@
+# HTTPS reverse proxy -> oauth2-proxy:4180 -> app:3000.
+services:
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.5
+    restart: unless-stopped
+    environment:
+      OAUTH2_PROXY_PROVIDER: oidc
+      OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
+      OAUTH2_PROXY_UPSTREAMS: "http://app:3000/"
+      OAUTH2_PROXY_REVERSE_PROXY: "true"
+      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:?Set OIDC_ISSUER_URL}
+      OAUTH2_PROXY_CLIENT_ID: ${OIDC_CLIENT_ID:?Set OIDC_CLIENT_ID}
+      OAUTH2_PROXY_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:?Set OIDC_CLIENT_SECRET}
+      OAUTH2_PROXY_REDIRECT_URL: ${APP_URL:?Set APP_URL without a trailing slash}/oauth2/callback
+      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET:?Set a random cookie secret}
+      OAUTH2_PROXY_COOKIE_SECURE: "true"
+      OAUTH2_PROXY_COOKIE_HTTPONLY: "true"
+      OAUTH2_PROXY_COOKIE_SAMESITE: lax
+      OAUTH2_PROXY_EMAIL_DOMAINS: ${OIDC_EMAIL_DOMAINS:?Set allowed email domains}
+      OAUTH2_PROXY_SCOPE: "openid profile email"
+      OAUTH2_PROXY_CODE_CHALLENGE_METHOD: S256
+      OAUTH2_PROXY_PASS_USER_HEADERS: "true"
+      OAUTH2_PROXY_PREFER_EMAIL_TO_USER: "false"
+      OAUTH2_PROXY_PASS_BASIC_AUTH: "false"
+      OAUTH2_PROXY_SKIP_AUTH_STRIP_HEADERS: "true"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - proxy
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+  app:
+    image: ghcr.io/simonjamain/howlongwillitlast:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      AUTH_MODE: proxy
+      IDENTITY_HEADER: x-forwarded-user
+    volumes:
+      - measurements:/data
+    # Only OAuth2 Proxy can reach the backend; never attach it to the proxy network.
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+volumes:
+  measurements:
+networks:
+  backend:
+    internal: true
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-proxy}

@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    image: howlongwillitlast:local
+    environment:
+      NODE_ENV: development
+      AUTH_MODE: development
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - development-data:/data
+volumes:
+  development-data:
