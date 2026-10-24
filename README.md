@@ -2,29 +2,42 @@
 
 A mobile-first, self-hosted app to record measurements of depleting resources and estimate when they will run out.
 
-> Work in progress — initial project scaffold. Not yet ready for production.
+> Planning stage — no application code or production-ready release yet.
+
+## Project decisions and AI continuation
+
+Read [AGENTS.md](AGENTS.md) for the agent entry point and [docs/HANDOFF.md](docs/HANDOFF.md) for the complete product decisions, architecture, open questions and next steps. The handoff distinguishes decisions confirmed in conversation from inherited choices and technical recommendations.
+
+Application development has not started. The latest request authorizes documenting the project for later continuation; implementation requires a subsequent instruction from the owner.
 
 ## Planned features
 
-- Independent measurement boards (fuel level, firewood, balance, or any numeric quantity)
-- Dated measurements, including backdated entries, corrections and deletion
-- Multiple configurable forecasting models displayed as separate colored lines
-- Days remaining and estimated depletion date for each model
-- Per-user boards with identity supplied by a trusted authentication reverse proxy
+- Independent per-user measurement boards with a freely chosen unit
+- Irregularly spaced measurements with editable date and time, defaulting to now
+- Backdated entries, corrections and individual deletion
+- Multiple forecasts selected per board and displayed as separate colored lines
+- Initial models: linear regression on all measurements and on the five most recent measurements
+- The selection window belongs to each model proposal
+- Days remaining and estimated depletion date for each model when a future zero crossing can be predicted
+- Reset a board by deleting its measurements after replenishment
 - French and English interface selected from browser preferences
-- SQLite persistence; single-container Docker deployment
+- SQLite persistence on a persistent volume; single-container Docker deployment
 
 ## Security model
 
-Production deployments **must** place the app behind a trusted authenticating reverse proxy, prevent direct access to the application port, and remove any incoming identity headers before the proxy sets its own. Development-only authentication bypass will be opt-in and map all requests to a single fixed test user.
+Production deployments **must** place the app behind a trusted authenticating reverse proxy such as OAuth2 Proxy, prevent direct access to the application port, and remove any incoming identity headers before the proxy sets its own. The application enforces ownership on every board and measurement operation.
 
-## Technology
+Development-only authentication bypass will be opt-in and map all requests to a single fixed test user. It must remain disabled in production. Exact identity headers and stable user identifier remain to be specified. See [SECURITY.md](SECURITY.md).
 
-Vue 3, TypeScript, Vite, PrimeVue, Apache ECharts, Fastify, Drizzle ORM and SQLite.
+## Technology and architecture
+
+Vue 3, TypeScript, Vite, PrimeVue, Apache ECharts, Node.js, Fastify, Drizzle ORM and SQLite.
+
+Use a lightweight hexagonal architecture: domain rules and forecasting calculations remain independent of frameworks; ports and adapters connect persistence, HTTP and proxy-provided identity. Keep code and operations simple.
 
 ## Status
 
-Scaffolding in progress. Installation, deployment instructions, and API details will be added as the implementation lands.
+Product framing and continuation documentation are available. Installation, deployment instructions and API details will be added with verified implementation.
 
 ## License
 
