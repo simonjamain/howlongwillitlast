@@ -39,6 +39,7 @@ export interface BoardStore {
  * Regression uses elapsed time, not sample index. asOf determines depletion status.
  * Non-decreasing trends yield not-predicted; a crossing <= asOf is already-depleted.
  * Inputs have already been validated: finite instants/values and known model ids.
+ * Returns exactly one Forecast per requested model, in request order, including insufficient-data.
  * Empty sampleAt is valid when only a depletion estimate is needed.
  */
 export interface ForecastEngine {
