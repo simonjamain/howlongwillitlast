@@ -53,12 +53,12 @@ The image runs as non-root user `node` (UID 1000). The named volume is initializ
 
 ## GitHub Container Registry
 
-[GitHub Actions](https://github.com/simonjamain/howlongwillitlast/actions) builds and tests the app, runs browser tests on desktop/mobile, then builds and exercises the production container, including restart persistence. Successful **push** builds publish the tested image to `ghcr.io/simonjamain/howlongwillitlast` using `GITHUB_TOKEN` and job-level `packages: write`. PR builds validate without publishing.
+[GitHub Actions](https://github.com/simonjamain/howlongwillitlast/actions) builds and tests the app, runs browser tests on desktop/mobile, then builds and exercises the production container, including restart persistence. Successful **pushes to main** publish the tested image to `ghcr.io/simonjamain/howlongwillitlast` using `GITHUB_TOKEN` and job-level `packages: write`. PR builds validate without publishing.
 
-Tags: branch name (e.g. `feat-domain-ports`), `sha-<full commit SHA>`, and `latest` only on the default branch.
+Tags: `main`, `sha-<full commit SHA>`, and `latest`. Pull requests build/test without publishing; merging into main triggers the publication workflow.
 
 ```sh
-docker pull ghcr.io/simonjamain/howlongwillitlast:feat-domain-ports
+docker pull ghcr.io/simonjamain/howlongwillitlast:latest
 ```
 
 Publication is confirmed only by a successful workflow run. Repository/organization policies can restrict writes. A newly created package may be private; anonymous pulls depend on its package visibility setting. No registry credential is stored in the repo.

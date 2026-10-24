@@ -92,7 +92,7 @@ Les deux régressions et leurs fenêtres sont décidées. Les règles ci-dessous
 2. Décision de V1 : accepter les dates identiques, les valeurs négatives et croissantes ; deux dates distinctes restent nécessaires dans la fenêtre de calcul. Valeurs bornées à ±1e12 et dates au domaine représentable par JavaScript.
 3. Décision de V1 : UTC en millisecondes en stockage/API, saisie et affichage en heure locale ; durée depuis asOf, envoyé à maintenant par l'interface. Rafraîchissement après édition, au retour du focus et par bouton ; pas de décompte animé.
 4. En-tête configurable IDENTITY_HEADER, défaut x-forwarded-user. Le déploiement réel doit confirmer le champ stable transmis par le proxy ; aucune configuration IdP spécifique n'est devinée.
-5. Deux écrans implémentés ; les deux modèles sont sélectionnés par défaut. CI : tag de branche, sha complet et latest sur la branche par défaut. Le déploiement sur l'infrastructure du propriétaire reste à faire.
+5. Deux écrans implémentés ; les deux modèles sont sélectionnés par défaut. CI corrigée à la demande du propriétaire : les pull requests valident sans publier ; seuls les pushes sur main (notamment après fusion) publient les tags main, sha complet et latest. Le déploiement sur l'infrastructure du propriétaire reste à faire.
 
 Seuls les points qui changent réellement le comportement utilisateur nécessitent une question. Les choix techniques courants peuvent être faits et documentés.
 
