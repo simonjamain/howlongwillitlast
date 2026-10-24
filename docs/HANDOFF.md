@@ -6,9 +6,9 @@ Dernière synthèse : 24 octobre 2026. Source : conversation de cadrage avec le 
 
 Au moment de cette synthèse, la branche main ne contient aucun code applicatif : uniquement README.md, CONTRIBUTING.md, SECURITY.md, LICENSE et .gitignore, auxquels s'ajoutent ces documents de reprise.
 
-Le propriétaire a explicitement demandé de préciser le projet avant tout code. La présente tâche autorise la documentation, pas le démarrage de l'implémentation. À la reprise, lire la demande courante : si elle autorise le développement, poursuivre sans demander à nouveau une autorisation déjà donnée. Sinon, rester au cadrage.
+Le propriétaire a explicitement demandé de préciser le projet avant tout code. Une instruction ultérieure autorise désormais uniquement les ports et les types associés, afin de relire les contrats avant toute implémentation. Voir [PORTS.md](PORTS.md). À la reprise, lire la demande courante : si elle autorise le développement, poursuivre sans demander à nouveau une autorisation déjà donnée. Sinon, rester au cadrage.
 
-Aucune application, image Docker, migration, API ou suite de tests n'a encore été produite ou validée.
+Les ports TypeScript et leurs types sont proposés sur feat/domain-ports ; leur compilation stricte a réussi. Aucune application, image Docker, migration, API ou suite de tests d'exécution n'a encore été produite ou validée.
 
 ## Besoin et vocabulaire
 
@@ -49,7 +49,7 @@ Le propriétaire a demandé de lire et rapprocher ces documents de la conversati
 - Mode de développement explicitement activé, avec un unique utilisateur de test fixe.
 - Licence MIT.
 
-Ces choix sont compatibles avec le cadrage actuel. Les conserver sauf instruction ultérieure ou obstacle concret à expliquer.
+La stack a depuis été explicitement validée par le propriétaire. Ces choix sont compatibles avec le cadrage actuel. Les conserver sauf instruction ultérieure ou obstacle concret à expliquer.
 
 ## Architecture proposée — à implémenter
 
@@ -84,7 +84,7 @@ Les deux régressions et leurs fenêtres sont décidées. Les règles ci-dessous
 - Ne pas présenter une projection comme une garantie ; aucun intervalle de confiance n'est demandé.
 
 À trancher sans rouvrir les décisions déjà prises :
-1. Le modèle « cinq derniers » est-il indisponible avant cinq relevés, ou utilise-t-il les points disponibles dès que le calcul est possible ?
+1. Décision désormais prise, par délégation du propriétaire : le modèle récent utilise jusqu'aux cinq derniers relevés dès deux dates distinctes dans cette fenêtre.
 2. Politique pour des relevés ayant exactement la même date-heure, les valeurs négatives et les valeurs ponctuellement croissantes.
 3. Stockage et affichage des fuseaux horaires, et référence de la durée restante (instant présent recommandé).
 4. Noms des en-têtes d'identité, identifiant stable et configuration du proxy.
