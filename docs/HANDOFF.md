@@ -118,3 +118,7 @@ Aucun besoin exprimé pour : partage de tableaux, rôles administrateur globaux,
 ## Retours de revue — Docker et Compose
 
 Le propriétaire a demandé un compose.yaml racine réservé au développement, minimal et utilisable sans proxy ni réseau externe. Il active AUTH_MODE=development et NODE_ENV=development, expose localhost:3000 et conserve SQLite dans development-data. L'exemple de production est compose.production.example.yaml, avec image GHCR, authentification proxy, volume et réseau externe. Le Dockerfile porte les labels OCI usuels ; CI injecte version, révision et date et contrôle ces valeurs. La publication reste réservée à main.
+
+## OAuth2 Proxy inclus dans l'exemple de production
+
+À la demande du propriétaire, compose.production.example.yaml inclut désormais OAuth2 Proxy v7.15.5 (OIDC générique). Chaîne : reverse proxy HTTPS existant → oauth2-proxy:4180 → app:3000. L'app n'appartient qu'au réseau backend interne ; OAuth2 Proxy est le seul service connecté aux deux réseaux. Configurer issuer, client, secret, domaines autorisés, APP_URL et secret cookie via .env ; callback APP_URL/oauth2/callback. Le développement reste autonome sans OIDC. CI valide la configuration avec des valeurs factices et discovery désactivée uniquement pour ce contrôle ; une connexion au vrai fournisseur reste à valider lors du déploiement.

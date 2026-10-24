@@ -36,28 +36,40 @@ Open http://127.0.0.1:3000. The root Compose file enables development identity e
 
 ## Production deployment example
 
-After the image has been published from main, adapt `compose.production.example.yaml` to your proxy's existing network:
+After the image is published from main, copy `.env.example` to `.env`, fill your OIDC settings, and generate a cookie secret locally:
 
 ```sh
-PROXY_NETWORK=proxy docker compose -f compose.production.example.yaml up -d
+cp .env.example .env
+openssl rand -base64 32 | tr -- '+/' '-_'
+# Put the generated value in OAUTH2_PROXY_COOKIE_SECRET in .env.
+docker compose -f compose.production.example.yaml up -d
 ```
 
-This example uses the GHCR image (`IMAGE_TAG=latest` by default), authenticates via proxy headers, and publishes no host port. Forward to `http://app:3000` on the proxy network, at the site root. Its database volume is separate from development. The authentication proxy itself is configured on your infrastructure.
+The stack includes OAuth2 Proxy v7.15.5 and the application. The only external component is your HTTPS reverse proxy (for example Traefik). Connect it to `PROXY_NETWORK` and forward the entire site root, including `/oauth2/`, to **`http://oauth2-proxy:4180`**. Do not forward to the app.
 
-The proxy must authenticate requests, strip incoming client identity headers, then set its own. Block direct access and restrict membership of the network. Use HTTPS and serve UI/API on the same origin. The app trusts the proxy; it does not validate tokens or consult the IdP.
+OAuth2 Proxy authenticates through the generic OIDC provider, removes incoming authentication headers and supplies `X-Forwarded-User` to `http://app:3000/`. The app is connected only to a separate internal backend network, with no published port. OAuth2 Proxy alone joins both networks. Its `depends_on` waits for the app health check.
 
-The default identity header is `X-Forwarded-User`. Configure `IDENTITY_HEADER` if your proxy forwards another header, such as `X-Auth-Request-User` in a forward-auth chain. Choose an identity stable over time and unique within the authentication realm. Changing that mapping changes board ownership as seen by users. See [SECURITY.md](SECURITY.md).
+Register **`APP_URL/oauth2/callback`** as the exact redirect URI in your confidential OIDC client, replacing APP_URL with the public HTTPS URL. Configure the client for authorization code with PKCE S256 and scopes `openid profile email`; the provider must supply a verified email. Adapt provider-specific settings if required by your IdP.
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `AUTH_MODE` | `proxy` | `proxy` or explicit local `development` |
-| `IDENTITY_HEADER` | `x-forwarded-user` | Header set by trusted proxy |
-| `DATABASE_PATH` | `data/app.sqlite` locally, `/data/app.sqlite` in Docker | SQLite file |
-| `HOST` | `127.0.0.1` locally, `0.0.0.0` in Docker | Listener |
-| `PORT` | `3000` | HTTP port |
-| `NODE_ENV` | unset locally, `production` in Docker | Blocks development auth in production |
-| `PROXY_NETWORK` | `proxy` | Production example network name |
-| `IMAGE_TAG` | `latest` | Production example GHCR image tag |
+| Setting | Purpose |
+| --- | --- |
+| `APP_URL` | Public HTTPS URL, without trailing slash |
+| `OIDC_ISSUER_URL` | Exact issuer URL, reachable from OAuth2 Proxy |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | Confidential OIDC client credentials |
+| `OAUTH2_PROXY_COOKIE_SECRET` | Random 32-byte secret generated above |
+| `OIDC_EMAIL_DOMAINS` | Allowed email domain(s), comma-separated; use your actual policy |
+| `PROXY_NETWORK` | Existing HTTPS reverse-proxy network, default `proxy` |
+| `IMAGE_TAG` | App image tag, default `latest` |
+
+Do not commit `.env`. Secure cookies require HTTPS. The HTTPS proxy must sanitize forwarding headers and be the only path to OAuth2 Proxy. Restrict membership of its network. No bypass route, insecure certificate option, Redis or separate app login is enabled.
+
+`X-Forwarded-User` uses the OIDC user identity rather than preferring email. Keep the issuer/client/subject mapping stable: changing identity mapping changes which boards users see. The app still accepts another trusted header through `IDENTITY_HEADER` for custom deployments; the supplied stack fixes the header to match OAuth2 Proxy.
+
+For the app itself: `AUTH_MODE=proxy` and `NODE_ENV=production` in production; `AUTH_MODE=development` and `NODE_ENV=development` in the root development Compose. Other app settings are `DATABASE_PATH` (Docker `/data/app.sqlite`), `HOST` (Docker `0.0.0.0`) and `PORT` (3000). The development stack requires no OIDC configuration.
+
+CI validates Compose interpolation and OAuth2 Proxy configuration with dummy credentials and discovery disabled for that check only. This does not verify a login against your real IdP; discovery and certificate verification remain enabled in the production example.
+
+References: [OAuth2 Proxy configuration](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/) and [releases](https://github.com/oauth2-proxy/oauth2-proxy/releases).
 
 The image runs as non-root user `node` (UID 1000). The named volume is initialized with the image's directory permissions; for bind mounts, make the directory writable by UID 1000. Back up SQLite with its backup API, or stop the app before copying database/WAL files. Keep backups outside this repository.
 

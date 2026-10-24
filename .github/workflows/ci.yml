@@ -37,9 +37,23 @@ jobs:
             --build-arg "VCS_REF=$GITHUB_SHA" \
             --build-arg "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" .
       - name: Validate Compose files
+        env:
+          APP_URL: https://howlong.example.com
+          OIDC_ISSUER_URL: https://identity.example.com
+          OIDC_CLIENT_ID: ci-client
+          OIDC_CLIENT_SECRET: ci-placeholder-not-a-secret
+          OIDC_EMAIL_DOMAINS: example.com
+          PROXY_NETWORK: howlong-ci-proxy
+          OAUTH2_PROXY_COOKIE_SECRET: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
         run: |
           docker compose config --quiet
           docker compose -f compose.production.example.yaml config --quiet
+          docker network create "$PROXY_NETWORK"
+          docker compose -f compose.production.example.yaml run --rm --no-deps oauth2-proxy \
+            --config-test --skip-oidc-discovery \
+            --login-url=https://identity.example.com/authorize \
+            --redeem-url=https://identity.example.com/token \
+            --oidc-jwks-url=https://identity.example.com/jwks
       - name: Start and check the production container
         run: |
           docker run -d --name howlong-ci --read-only --tmpfs /tmp -v howlong-ci-data:/data -p 127.0.0.1:3200:3000 howlongwillitlast:ci
