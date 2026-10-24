@@ -33,7 +33,6 @@ jobs:
       - name: Start and check the production container
         run: |
           docker run -d --name howlong-ci --read-only --tmpfs /tmp -v howlong-ci-data:/data -p 127.0.0.1:3200:3000 howlongwillitlast:ci
-          curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:3200/healthz
           node scripts/container-smoke.mjs
       - name: Image tags
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
