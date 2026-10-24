@@ -20,7 +20,7 @@ Les signatures ne dépendent d'aucune bibliothèque. Les imports .js sont intent
 - Les erreurs attendues sont des Result au port entrant ; une ressource absente et celle d'un autre utilisateur produisent toutes deux not-found.
 - Les échecs inattendus d'infrastructure rejettent les promesses ; l'adaptateur HTTP devra les convertir en erreur serveur sans fuite d'informations.
 - Les réglages d'un tableau incluent ses modèles sélectionnés ; les couleurs et traductions appartiennent à l'interface.
-- Les dates sont des nombres en millisecondes UTC. L'affichage et la saisie locale relèvent de l'adaptateur ; aucun fuseau n'est perdu dans un instant.
+- Les dates sont des nombres en millisecondes UTC. L'affichage et la saisie locale relèvent de l'adaptateur ; le timestamp préserve l'instant, pas le fuseau d'origine.
 - Le calcul reçoit asOf explicitement pour être déterministe. La durée restante est mesurée depuis cet instant, normalement maintenant.
 - sampleAt permet au consommateur de choisir les instants de tracé sans dépendre d'ECharts ni imposer un pas de temps au domaine.
 - Les points prédits ne sont pas tronqués à zéro ; l'interface décidera du cadrage visuel.
@@ -35,7 +35,7 @@ La stack Vue/TypeScript, Fastify, Drizzle et SQLite est désormais explicitement
 Les deux écrans présentés sont des propositions : liste des tableaux et détail avec relevés et graphique.
 Le propriétaire a autorisé uniquement les ports pour examiner les contrats avant la suite.
 
-La compilation stricte des contrats est la validation pertinente ici ; les tests de calcul et d'isolation nécessiteront les implémentations. Aucun test d'exécution n'est revendiqué.
+Validation effectuée : compilation TypeScript stricte réussie avec \`npm exec --yes --package=typescript -- tsc -p tsconfig.contracts.json\`. Cette commande nécessite TypeScript disponible ou son téléchargement. La compilation des contrats est la validation pertinente ici ; les tests de calcul et d'isolation nécessiteront les implémentations. Aucun test d'exécution n'est revendiqué.
 
 ## Points de revue
 
