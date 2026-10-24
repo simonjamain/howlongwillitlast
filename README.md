@@ -2,13 +2,13 @@
 
 A mobile-first, self-hosted app to record measurements of depleting resources and estimate when they will run out.
 
-> Planning stage — no application code or production-ready release yet.
+> Contract review stage — TypeScript ports only; no runnable application or production-ready release.
 
 ## Project decisions and AI continuation
 
 Read [AGENTS.md](AGENTS.md) for the agent entry point and [docs/HANDOFF.md](docs/HANDOFF.md) for the complete product decisions, architecture, open questions and next steps. The handoff distinguishes decisions confirmed in conversation from inherited choices and technical recommendations.
 
-Application development has not started. The latest request authorizes documenting the project for later continuation; implementation requires a subsequent instruction from the owner.
+The owner has authorized ports and supporting types for review before implementation. Read [docs/PORTS.md](docs/PORTS.md) for the proposed contracts and validation. Adapters, use cases, forecasting algorithms and UI remain unimplemented.
 
 ## Planned features
 
