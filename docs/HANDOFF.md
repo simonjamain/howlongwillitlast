@@ -114,3 +114,7 @@ Aucun besoin exprimé pour : partage de tableaux, rôles administrateur globaux,
 - [Contribution](https://github.com/simonjamain/howlongwillitlast/blob/main/CONTRIBUTING.md)
 - [Sécurité](https://github.com/simonjamain/howlongwillitlast/blob/main/SECURITY.md)
 - Conversation de cadrage du 24 octobre 2026 avec le propriétaire : décisions retranscrites ci-dessus, sans lien public disponible.
+
+## Retours de revue — Docker et Compose
+
+Le propriétaire a demandé un compose.yaml racine réservé au développement, minimal et utilisable sans proxy ni réseau externe. Il active AUTH_MODE=development et NODE_ENV=development, expose localhost:3000 et conserve SQLite dans development-data. L'exemple de production est compose.production.example.yaml, avec image GHCR, authentification proxy, volume et réseau externe. Le Dockerfile porte les labels OCI usuels ; CI injecte version, révision et date et contrôle ces valeurs. La publication reste réservée à main.

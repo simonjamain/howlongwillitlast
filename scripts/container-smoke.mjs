@@ -1,5 +1,29 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+
+const [image] = JSON.parse(
+  execFileSync("docker", ["image", "inspect", "howlongwillitlast:ci"], {
+    encoding: "utf8",
+  }),
+);
+const labels = image.Config.Labels;
+assert.equal(
+  labels["org.opencontainers.image.title"],
+  "How Long Will It Last?",
+);
+assert.equal(labels["org.opencontainers.image.licenses"], "MIT");
+assert.equal(
+  labels["org.opencontainers.image.version"],
+  JSON.parse(readFileSync("package.json", "utf8")).version,
+);
+assert.equal(
+  labels["org.opencontainers.image.revision"],
+  process.env.GITHUB_SHA,
+);
+assert.ok(
+  Number.isFinite(Date.parse(labels["org.opencontainers.image.created"])),
+);
 
 const base = "http://127.0.0.1:3200";
 async function waitReady() {

@@ -7,7 +7,20 @@ COPY . .
 RUN npm run build && npm prune --omit=dev
 
 FROM node:24-bookworm-slim
-LABEL org.opencontainers.image.source="https://github.com/simonjamain/howlongwillitlast"
+ARG IMAGE_VERSION=dev
+ARG VCS_REF
+ARG BUILD_DATE
+LABEL org.opencontainers.image.title="How Long Will It Last?" \
+      org.opencontainers.image.description="Self-hosted reserve tracking and depletion forecasts from irregular measurements." \
+      org.opencontainers.image.url="https://github.com/simonjamain/howlongwillitlast" \
+      org.opencontainers.image.documentation="https://github.com/simonjamain/howlongwillitlast/blob/main/README.md" \
+      org.opencontainers.image.source="https://github.com/simonjamain/howlongwillitlast" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.authors="simonjamain (https://github.com/simonjamain)" \
+      org.opencontainers.image.vendor="simonjamain" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.created="${BUILD_DATE}"
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 DATABASE_PATH=/data/app.sqlite AUTH_MODE=proxy
 WORKDIR /app
 COPY --from=build --chown=node:node /app/package.json ./
