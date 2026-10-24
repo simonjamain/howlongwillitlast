@@ -1,44 +1,84 @@
 # How Long Will It Last?
 
-A mobile-first, self-hosted app to record measurements of depleting resources and estimate when they will run out.
+A mobile-first, self-hosted app to record reserves and estimate when they run out. Fuel, firewood, a balance: create a board with a name and any unit.
 
-> Contract review stage — TypeScript ports only; no runnable application or production-ready release.
+## Features
 
-## Project decisions and AI continuation
+- Personal boards with editable settings and selected forecasting models.
+- Irregular measurements with editable date/time defaulting to now; backdating, correction and deletion.
+- Linear regression on all readings or up to the five most recent ones, available from two distinct measurement times.
+- Colored forecasts, estimated days remaining and depletion date; explicit insufficient-data, non-decreasing-trend and past-depletion states.
+- Confirmed reset deletes readings while retaining board settings.
+- French and English, initially selected from browser preferences, switchable in the header.
+- SQLite on a persistent volume; one container serves both API and compiled frontend.
 
-Read [AGENTS.md](AGENTS.md) for the agent entry point and [docs/HANDOFF.md](docs/HANDOFF.md) for the complete product decisions, architecture, open questions and next steps. The handoff distinguishes decisions confirmed in conversation from inherited choices and technical recommendations.
+These are estimates, not guarantees. Units are used as entered; tank height is not converted to volume. Consumption changes and tank geometry can make a linear forecast misleading.
 
-The owner has authorized ports and supporting types for review before implementation. Read [docs/PORTS.md](docs/PORTS.md) for the proposed contracts and validation. Adapters, use cases, forecasting algorithms and UI remain unimplemented.
+## Local start — Node.js 24
 
-## Planned features
+```sh
+npm ci
+npm run build
+AUTH_MODE=development npm start
+```
 
-- Independent per-user measurement boards with a freely chosen unit
-- Irregularly spaced measurements with editable date and time, defaulting to now
-- Backdated entries, corrections and individual deletion
-- Multiple forecasts selected per board and displayed as separate colored lines
-- Initial models: linear regression on all measurements and on the five most recent measurements
-- The selection window belongs to each model proposal
-- Days remaining and estimated depletion date for each model when a future zero crossing can be predicted
-- Reset a board by deleting its measurements after replenishment
-- French and English interface selected from browser preferences
-- SQLite persistence on a persistent volume; single-container Docker deployment
+Open http://127.0.0.1:3000. Explicit development mode uses the fixed identity `development-user` and ignores identity headers. It refuses to start with `NODE_ENV=production`; keep it local.
 
-## Security model
+For hot reload, run `AUTH_MODE=development npm run dev` and `npm run dev:ui` in separate terminals. Open the Vite address; its `/api` proxy targets port 3000. The server does not automatically load `.env`; export shell variables.
 
-Production deployments **must** place the app behind a trusted authenticating reverse proxy such as OAuth2 Proxy, prevent direct access to the application port, and remove any incoming identity headers before the proxy sets its own. The application enforces ownership on every board and measurement operation.
+## Docker behind your authentication proxy
 
-Development-only authentication bypass will be opt-in and map all requests to a single fixed test user. It must remain disabled in production. Exact identity headers and stable user identifier remain to be specified. See [SECURITY.md](SECURITY.md).
+```sh
+docker build -t howlongwillitlast:local .
+PROXY_NETWORK=proxy docker compose up -d --build
+```
 
-## Technology and architecture
+Compose expects an existing external network shared with your trusted authentication proxy. It publishes no host port; forward to `http://app:3000` on that network, at the site root.
 
-Vue 3, TypeScript, Vite, PrimeVue, Apache ECharts, Node.js, Fastify, Drizzle ORM and SQLite.
+The proxy must authenticate requests, strip incoming client identity headers, then set its own. Block direct access and restrict membership of the network. Use HTTPS and serve UI/API on the same origin. The app trusts the proxy; it does not validate tokens or consult the IdP.
 
-Use a lightweight hexagonal architecture: domain rules and forecasting calculations remain independent of frameworks; ports and adapters connect persistence, HTTP and proxy-provided identity. Keep code and operations simple.
+The default identity header is `X-Forwarded-User`. Configure `IDENTITY_HEADER` if your proxy forwards another header, such as `X-Auth-Request-User` in a forward-auth chain. Choose an identity stable over time and unique within the authentication realm. Changing that mapping changes board ownership as seen by users. See [SECURITY.md](SECURITY.md).
 
-## Status
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `AUTH_MODE` | `proxy` | `proxy` or explicit local `development` |
+| `IDENTITY_HEADER` | `x-forwarded-user` | Header set by trusted proxy |
+| `DATABASE_PATH` | `data/app.sqlite` locally, `/data/app.sqlite` in Docker | SQLite file |
+| `HOST` | `127.0.0.1` locally, `0.0.0.0` in Docker | Listener |
+| `PORT` | `3000` | HTTP port |
+| `NODE_ENV` | unset locally, `production` in Docker | Blocks development auth in production |
+| `PROXY_NETWORK` | `proxy` | Compose-only network name |
 
-Product framing and continuation documentation are available. Installation, deployment instructions and API details will be added with verified implementation.
+The image runs as non-root user `node` (UID 1000). The named volume is initialized with the image's directory permissions; for bind mounts, make the directory writable by UID 1000. Back up SQLite with its backup API, or stop the app before copying database/WAL files. Keep backups outside this repository.
 
-## License
+## GitHub Container Registry
+
+[GitHub Actions](https://github.com/simonjamain/howlongwillitlast/actions) builds and tests the app, runs browser tests on desktop/mobile, then builds and exercises the production container, including restart persistence. Successful **push** builds publish the tested image to `ghcr.io/simonjamain/howlongwillitlast` using `GITHUB_TOKEN` and job-level `packages: write`. PR builds validate without publishing.
+
+Tags: branch name (e.g. `feat-domain-ports`), `sha-<full commit SHA>`, and `latest` only on the default branch.
+
+```sh
+docker pull ghcr.io/simonjamain/howlongwillitlast:feat-domain-ports
+```
+
+Publication is confirmed only by a successful workflow run. Repository/organization policies can restrict writes. A newly created package may be private; anonymous pulls depend on its package visibility setting. No registry credential is stored in the repo.
+
+## Verification
+
+```sh
+npm run build
+npm test
+npx playwright install --with-deps chromium
+npm run test:e2e
+npm run format:check
+```
+
+TypeScript is pinned to 6.0.2 for compatibility with `vue-tsc`; dependencies are locked in `package-lock.json`. Browser tests can use an existing executable via `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+
+## Design and continuation
+
+Vue 3, TypeScript, Vite, PrimeVue 4, Apache ECharts, Node.js, Fastify, Drizzle ORM and SQLite. Domain/application rules depend on ports; HTTP/SQLite are adapters. All assets are self-hosted, including chart code.
+
+Read [AGENTS.md](AGENTS.md), [docs/HANDOFF.md](docs/HANDOFF.md), [docs/PORTS.md](docs/PORTS.md) and [docs/API.md](docs/API.md).
 
 MIT. See [LICENSE](LICENSE).

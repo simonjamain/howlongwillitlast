@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    image: howlongwillitlast:local
+    restart: unless-stopped
+    environment:
+      IDENTITY_HEADER: x-forwarded-user
+    volumes:
+      - measurements:/data
+    # Attach the trusted authenticating proxy to this network.
+    # No host port is published: proxy -> http://app:3000.
+    networks:
+      - proxy
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+volumes:
+  measurements:
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-proxy}

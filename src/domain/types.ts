@@ -3,7 +3,7 @@ export type Instant = number;
 export type UserId = string;
 export type BoardId = string;
 export type MeasurementId = string;
-export type ForecastModelId = 'linear-all' | 'linear-last-five';
+export type ForecastModelId = "linear-all" | "linear-last-five";
 
 /** Created by the trusted authentication adapter, never from a request body. */
 export interface Actor {
@@ -41,18 +41,22 @@ export interface ForecastPoint {
 }
 
 export type Depletion =
-  | { readonly status: 'future'; readonly at: Instant; readonly remainingMs: number }
-  | { readonly status: 'already-depleted'; readonly at: Instant }
-  | { readonly status: 'not-predicted' };
+  | {
+      readonly status: "future";
+      readonly at: Instant;
+      readonly remainingMs: number;
+    }
+  | { readonly status: "already-depleted"; readonly at: Instant }
+  | { readonly status: "not-predicted" };
 
 export type Forecast =
   | {
       readonly model: ForecastModelId;
-      readonly status: 'insufficient-data';
+      readonly status: "insufficient-data";
     }
   | {
       readonly model: ForecastModelId;
-      readonly status: 'available';
+      readonly status: "available";
       readonly usedMeasurementIds: readonly MeasurementId[];
       /** Model values at requested instants, in the same order; no clamping to zero. */
       readonly points: readonly ForecastPoint[];
@@ -62,8 +66,12 @@ export type Forecast =
 /** Expected failures are values; unexpected infrastructure failures reject the promise. */
 export type Result<T> =
   | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly error: { readonly code: 'not-found' } }
+  | { readonly ok: false; readonly error: { readonly code: "not-found" } }
   | {
       readonly ok: false;
-      readonly error: { readonly code: 'invalid-input'; readonly field: string; readonly message: string };
+      readonly error: {
+        readonly code: "invalid-input";
+        readonly field: string;
+        readonly message: string;
+      };
     };

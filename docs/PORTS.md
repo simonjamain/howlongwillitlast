@@ -1,7 +1,6 @@
 # Contrats à relire
 
-Statut : proposition de ports TypeScript uniquement, autorisée le 24 octobre 2026.
-Aucun cas d'usage, adaptateur, endpoint, calcul de régression ou écran n'est implémenté.
+Statut : contrats relus et validés par le propriétaire le 24 octobre 2026, puis implémentés dans la V1. Les remarques ci-dessous expliquent la conception d'origine ; l'état courant et les validations figurent dans HANDOFF.md.
 
 ## Lire les contrats
 
@@ -24,7 +23,7 @@ Les signatures ne dépendent d'aucune bibliothèque. Les imports .js sont intent
 - Le calcul reçoit asOf explicitement pour être déterministe. La durée restante est mesurée depuis cet instant, normalement maintenant.
 - sampleAt permet au consommateur de choisir les instants de tracé sans dépendre d'ECharts ni imposer un pas de temps au domaine.
 - Les points prédits ne sont pas tronqués à zéro ; l'interface décidera du cadrage visuel.
-- Les valeurs et instants doivent être finis. La politique métier sur les valeurs négatives, croissantes et les doublons de dates reste à décider avant l'implémentation. L'ordre par id départage les dates égales de façon déterministe sans définir leur acceptation.
+- Les valeurs et instants doivent être finis. La V1 accepte les valeurs négatives, croissantes et les doublons de dates ; voir API.md pour les limites numériques. L'ordre par id départage les dates égales de façon déterministe sans définir leur acceptation.
 - Le modèle récent utilise jusqu'à cinq points et fonctionne dès deux dates distinctes dans sa fenêtre : décision déléguée à l'assistant par le propriétaire.
 - Une tendance plate ou croissante n'annonce aucun épuisement. Une date de passage à zéro déjà passée dispose d'un état distinct.
 - L'effacement global préserve nom, unité et modèles ; la confirmation relève de l'interface.
@@ -33,9 +32,9 @@ Les signatures ne dépendent d'aucune bibliothèque. Les imports .js sont intent
 
 La stack Vue/TypeScript, Fastify, Drizzle et SQLite est désormais explicitement validée.
 Les deux écrans présentés sont des propositions : liste des tableaux et détail avec relevés et graphique.
-Le propriétaire a autorisé uniquement les ports pour examiner les contrats avant la suite.
+Le propriétaire avait d'abord autorisé les seuls ports, puis a validé les contrats et autorisé la V1 complète.
 
-Validation effectuée : compilation TypeScript stricte réussie avec \`npm exec --yes --package=typescript -- tsc -p tsconfig.contracts.json\`. Cette commande nécessite TypeScript disponible ou son téléchargement. La compilation des contrats est la validation pertinente ici ; les tests de calcul et d'isolation nécessiteront les implémentations. Aucun test d'exécution n'est revendiqué.
+Validation effectuée : compilation TypeScript stricte réussie avec `npm exec --yes --package=typescript -- tsc -p tsconfig.contracts.json`. Cette commande nécessite TypeScript disponible ou son téléchargement. La compilation des contrats est la validation pertinente ici ; la V1 possède désormais des tests de calcul, d'isolation, de persistance et de parcours navigateur ; voir HANDOFF.md.
 
 ## Points de revue
 

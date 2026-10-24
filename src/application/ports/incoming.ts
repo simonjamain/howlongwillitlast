@@ -1,7 +1,16 @@
 import type {
-  Actor, Board, BoardId, BoardSettings, BoardSnapshot, Forecast,
-  Instant, Measurement, MeasurementId, MeasurementInput, Result,
-} from '../../domain/types.js';
+  Actor,
+  Board,
+  BoardId,
+  BoardSettings,
+  BoardSnapshot,
+  Forecast,
+  Instant,
+  Measurement,
+  MeasurementId,
+  MeasurementInput,
+  Result,
+} from "../../domain/types.js";
 
 /**
  * Driving port: an authenticated actor is required on every call.
@@ -14,15 +23,26 @@ export interface ResourceTracking {
   createBoard(actor: Actor, settings: BoardSettings): Promise<Result<Board>>;
   getBoard(actor: Actor, boardId: BoardId): Promise<Result<BoardSnapshot>>;
   /** Complete replacement of editable settings; preserves measurements. */
-  updateBoard(actor: Actor, boardId: BoardId, settings: BoardSettings): Promise<Result<Board>>;
+  updateBoard(
+    actor: Actor,
+    boardId: BoardId,
+    settings: BoardSettings,
+  ): Promise<Result<Board>>;
   addMeasurement(
-    actor: Actor, boardId: BoardId, input: MeasurementInput,
+    actor: Actor,
+    boardId: BoardId,
+    input: MeasurementInput,
   ): Promise<Result<Measurement>>;
   updateMeasurement(
-    actor: Actor, boardId: BoardId, measurementId: MeasurementId, input: MeasurementInput,
+    actor: Actor,
+    boardId: BoardId,
+    measurementId: MeasurementId,
+    input: MeasurementInput,
   ): Promise<Result<Measurement>>;
   deleteMeasurement(
-    actor: Actor, boardId: BoardId, measurementId: MeasurementId,
+    actor: Actor,
+    boardId: BoardId,
+    measurementId: MeasurementId,
   ): Promise<Result<void>>;
   /** Deletes all measurements atomically; preserves the board and its settings. */
   resetMeasurements(actor: Actor, boardId: BoardId): Promise<Result<void>>;
@@ -33,7 +53,8 @@ export interface ResourceTracking {
    * No request can supply an owner id in place of the authenticated actor.
    */
   forecast(
-    actor: Actor, boardId: BoardId,
+    actor: Actor,
+    boardId: BoardId,
     query: { readonly asOf: Instant; readonly sampleAt: readonly Instant[] },
   ): Promise<Result<readonly Forecast[]>>;
 }

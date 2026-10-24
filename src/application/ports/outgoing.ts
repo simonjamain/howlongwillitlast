@@ -1,7 +1,16 @@
 import type {
-  Actor, Board, BoardId, BoardSettings, BoardSnapshot, Forecast, ForecastModelId,
-  Instant, Measurement, MeasurementId, MeasurementInput,
-} from '../../domain/types.js';
+  Actor,
+  Board,
+  BoardId,
+  BoardSettings,
+  BoardSnapshot,
+  Forecast,
+  ForecastModelId,
+  Instant,
+  Measurement,
+  MeasurementId,
+  MeasurementInput,
+} from "../../domain/types.js";
 
 /**
  * Persistence port, independent of SQLite/Drizzle.
@@ -16,16 +25,25 @@ export interface BoardStore {
   /** Board, settings and ordered measurements read from one consistent snapshot. */
   get(actor: Actor, boardId: BoardId): Promise<BoardSnapshot | undefined>;
   update(
-    actor: Actor, boardId: BoardId, settings: BoardSettings,
+    actor: Actor,
+    boardId: BoardId,
+    settings: BoardSettings,
   ): Promise<Board | undefined>;
   addMeasurement(
-    actor: Actor, boardId: BoardId, input: MeasurementInput,
+    actor: Actor,
+    boardId: BoardId,
+    input: MeasurementInput,
   ): Promise<Measurement | undefined>;
   updateMeasurement(
-    actor: Actor, boardId: BoardId, measurementId: MeasurementId, input: MeasurementInput,
+    actor: Actor,
+    boardId: BoardId,
+    measurementId: MeasurementId,
+    input: MeasurementInput,
   ): Promise<Measurement | undefined>;
   deleteMeasurement(
-    actor: Actor, boardId: BoardId, measurementId: MeasurementId,
+    actor: Actor,
+    boardId: BoardId,
+    measurementId: MeasurementId,
   ): Promise<boolean>;
   /** true also for an owned board that already has no measurements. */
   resetMeasurements(actor: Actor, boardId: BoardId): Promise<boolean>;

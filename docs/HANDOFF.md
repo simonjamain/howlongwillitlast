@@ -4,11 +4,15 @@ Dernière synthèse : 24 octobre 2026. Source : conversation de cadrage avec le 
 
 ## État et autorisation
 
-Au moment de cette synthèse, la branche main ne contient aucun code applicatif : uniquement README.md, CONTRIBUTING.md, SECURITY.md, LICENSE et .gitignore, auxquels s'ajoutent ces documents de reprise.
+Le propriétaire a relu et validé les ports, puis autorisé une première version complète. Il a aussi demandé la publication automatique de l'image sur GitHub Container Registry en CI et autorisé l'envoi de la branche.
 
-Le propriétaire a explicitement demandé de préciser le projet avant tout code. Une instruction ultérieure autorise désormais uniquement les ports et les types associés, afin de relire les contrats avant toute implémentation. Voir [PORTS.md](PORTS.md). À la reprise, lire la demande courante : si elle autorise le développement, poursuivre sans demander à nouveau une autorisation déjà donnée. Sinon, rester au cadrage.
+La branche de travail est feat/domain-ports. Elle contient désormais le domaine de calcul, les cas d'usage, les adaptateurs HTTP/SQLite, l'interface Vue FR/EN, le Dockerfile, Compose et la CI GHCR. Voir README.md pour les commandes et API.md pour les routes.
 
-Les ports TypeScript et leurs types sont proposés sur feat/domain-ports ; leur compilation stricte a réussi. Aucune application, image Docker, migration, API ou suite de tests d'exécution n'a encore été produite ou validée.
+Validations locales : compilation TypeScript/Vue et build Vite réussis ; 10 tests de calcul/API avec SQLite réel réussis ; parcours Playwright desktop et mobile réussis (création, saisie, projection, édition, sélection persistante des modèles, langues et reset). Les captures ont été inspectées séparément. TypeScript 6.0.2 est épinglé pour vue-tsc ; PrimeVue 4 est conservé.
+
+Limite : aucun moteur Docker local. La CI construit le conteneur, vérifie le redémarrage avec persistance et publie seulement après ces vérifications. Consulter le résultat effectif de GitHub Actions avant d'affirmer que l'image est publiée.
+
+Les changements de revue ont conservé les signatures des ports ; le formatage a seulement été normalisé.
 
 ## Besoin et vocabulaire
 
@@ -51,7 +55,7 @@ Le propriétaire a demandé de lire et rapprocher ces documents de la conversati
 
 La stack a depuis été explicitement validée par le propriétaire. Ces choix sont compatibles avec le cadrage actuel. Les conserver sauf instruction ultérieure ou obstacle concret à expliquer.
 
-## Architecture proposée — à implémenter
+## Architecture retenue et implémentée
 
 Le domaine contient les règles des tableaux, des relevés et des calculs, sans dépendance à Vue, Fastify, Drizzle ou aux en-têtes HTTP.
 
@@ -85,10 +89,10 @@ Les deux régressions et leurs fenêtres sont décidées. Les règles ci-dessous
 
 À trancher sans rouvrir les décisions déjà prises :
 1. Décision désormais prise, par délégation du propriétaire : le modèle récent utilise jusqu'aux cinq derniers relevés dès deux dates distinctes dans cette fenêtre.
-2. Politique pour des relevés ayant exactement la même date-heure, les valeurs négatives et les valeurs ponctuellement croissantes.
-3. Stockage et affichage des fuseaux horaires, et référence de la durée restante (instant présent recommandé).
-4. Noms des en-têtes d'identité, identifiant stable et configuration du proxy.
-5. Détails d'interface, valeurs par défaut des modèles sélectionnés et distribution de l'image Docker.
+2. Décision de V1 : accepter les dates identiques, les valeurs négatives et croissantes ; deux dates distinctes restent nécessaires dans la fenêtre de calcul. Valeurs bornées à ±1e12 et dates au domaine représentable par JavaScript.
+3. Décision de V1 : UTC en millisecondes en stockage/API, saisie et affichage en heure locale ; durée depuis asOf, envoyé à maintenant par l'interface. Rafraîchissement après édition, au retour du focus et par bouton ; pas de décompte animé.
+4. En-tête configurable IDENTITY_HEADER, défaut x-forwarded-user. Le déploiement réel doit confirmer le champ stable transmis par le proxy ; aucune configuration IdP spécifique n'est devinée.
+5. Deux écrans implémentés ; les deux modèles sont sélectionnés par défaut. CI : tag de branche, sha complet et latest sur la branche par défaut. Le déploiement sur l'infrastructure du propriétaire reste à faire.
 
 Seuls les points qui changent réellement le comportement utilisateur nécessitent une question. Les choix techniques courants peuvent être faits et documentés.
 
@@ -98,12 +102,11 @@ Aucun besoin exprimé pour : partage de tableaux, rôles administrateur globaux,
 
 ## Marche à suivre à la reprise
 
-1. Lire ce document, puis vérifier l'état réel du dépôt et la demande courante. Ce document est une photographie du cadrage, pas une preuve que le dépôt est toujours vide.
-2. Conserver les décisions ci-dessus ; présenter les éventuels écarts avec les nouvelles instructions.
-3. Si le développement est demandé, résoudre les seuls points ouverts nécessaires, puis construire une première tranche : identité, tableau personnel, relevés persistants, graphique et régressions.
-4. Vérifier les calculs sur des séries à intervalles irréguliers, la sélection des derniers relevés, les cas sans épuisement, l'isolation entre utilisateurs et la persistance après redémarrage.
-5. Vérifier ensuite l'édition, la suppression, la remise à zéro, les deux langues et l'usage mobile ; construire et tester l'image Docker.
-6. Mettre à jour les instructions d'installation et ce document avec les résultats réels, les commandes disponibles, les validations effectuées et les limites restantes. Une étape est terminée quand son comportement est vérifié, pas quand son code est simplement écrit.
+1. Vérifier la branche et les instructions courantes, puis consulter les résultats CI du dernier commit.
+2. Exécuter les scripts documentés dans README.md après toute modification pertinente.
+3. Vérifier le déploiement réel avec le proxy choisi et un volume persistant. Confirmer l'identifiant stable de l'utilisateur et l'absence d'accès direct.
+4. Mettre à jour ce document avec les résultats effectifs de construction/publication et les limitations restantes.
+5. Toute évolution du schéma ajoute une migration versionnée ; le SQL de bootstrap version 1 est une migration immuable, distincte du schéma Drizzle utilisé par les requêtes.
 
 ## Sources
 
